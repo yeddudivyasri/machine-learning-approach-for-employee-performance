@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Productivity Predictor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef;
+      padding: 40px;
+    }
+    .container {
+      max-width: 550px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
+    }
+    #result {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Predict Actual Productivity</h2>
+    <form id="predictForm">
+      <label>Department:
+        <select name="department" required>
+          <option value="sweing">sweing</option>
+          <option value="finishing">finishing</option>
+          <option value="cutting">cutting</option>
+        </select>
+      </label>
+
+      <label>Day:
+        <select name="day" required>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Saturday">Saturday</option>
+          <option value="Sunday">Sunday</option>
+        </select>
+      </label>
+
+      <label>Quarter:
+        <input type="number" name="quarter" min="1" max="4" required>
+      </label>
+      <label>Team:
+        <input type="number" name="team" min="1" max="57" required>
+      </label>
+      <label>Targeted Productivity:
+        <input type="number" step="0.01" name="targeted_productivity" min="0" max="1" required>
+      </label>
+      <label>SMV:
+        <input type="number" step="0.01" name="smv" min="1" max="87" required>
+      </label>
+      <label>WIP:
+        <input type="number" name="wip" min="0" max="1254" required>
+      </label>
+      <label>Over Time:
+        <input type="number" name="over_time" min="0" max="11450" required>
+      </label>
+      <label>Incentive:
+        <input type="number" name="incentive" min="0" max="3000" required>
+      </label>
+      <label>Idle Time:
+        <input type="number" step="0.01" name="idle_time" min="0" max="120" required>
+      </label>
+      <label>Idle Men:
+        <input type="number" name="idle_men" min="0" max="8" required>
+      </label>
+      <label>No of Style Change:
+        <input type="number" name="no_of_style_change" min="0" max="5" required>
+      </label>
+      <label>No of Workers:
+        <input type="number" name="no_of_workers" min="2" max="89" required>
+      </label>
+
+      <button type="submit">Predict</button>
+    </form>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    document.getElementById('predictForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const jsonData = Object.fromEntries(formData.entries());
+
+      // Convert numeric fields to numbers
+      for (let key in jsonData) {
+        if (!isNaN(jsonData[key])) {
+          jsonData[key] = parseFloat(jsonData[key]);
+        }
+      }
+
+      fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jsonData)
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('result').innerText = data.predicted_productivity !== undefined
+          ? "Predicted Actual Productivity: " + data.predicted_productivity
+          : "Error: " + data.error;
+      });
+    });
+  </script>
+</body>
+</html>
